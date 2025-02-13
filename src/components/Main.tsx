@@ -1,4 +1,3 @@
-// src/components/Main.tsx
 import React, { useEffect, useRef, useState } from "react";
 import Navbar from "components/Navbar";
 import Home from "components/Home";
@@ -15,12 +14,11 @@ const Main: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const searchRef = useRef<HTMLInputElement | null>(null);
+
   const getNews = async () => {
     try {
       setIsLoading(true);
-      const strapiResponse = await fetch(
-        `${process.env.REACT_APP_STRAPI_URL}/api/articles?populate=*`
-      );
+      const strapiResponse = await fetch(`${process.env.REACT_APP_STRAPI_URL}/api/articles?populate=*`);
       const strapiData = await strapiResponse.json();
 
       const strapiArticles = strapiData.data.map((item: any) => {
@@ -38,7 +36,6 @@ const Main: React.FC = () => {
                 description: block.Description,
               };
             }
-
             return null;
           })
           .filter(Boolean); // to remove any null values
@@ -53,19 +50,12 @@ const Main: React.FC = () => {
         };
       });
 
-      const externalResponse = await fetch(
-        `https://newsapi.org/v2/everything?q=${
-          menu ? menu : "politics"
-        }&sortBy=popularity&apiKey=7c73bb31409f4f66958cadb605ae0bce`
-      );
+      const externalResponse = await fetch(`https://newsapi.org/v2/everything?q=${menu ? menu : "politics"}&sortBy=popularity&apiKey=7c73bb31409f4f66958cadb605ae0bce`);
       const externalData = await externalResponse.json();
       const externalArticles = externalData.articles || [];
 
-      // filter out articles where title is "[Removed]"
-      const filteredExternalArticles = externalArticles.filter(
-        (article: any) => article.title !== "[Removed]"
-      );
-
+      const filteredExternalArticles = externalArticles.filter((article: any) => article.title !== "[Removed]");
+      
       setNews([...strapiArticles, ...filteredExternalArticles]);
       setIsLoading(false);
     } catch (err) {
@@ -75,7 +65,7 @@ const Main: React.FC = () => {
   };
 
   useEffect(() => {
-    if(!news.length) {
+    if (!news.length) {
       getNews();
     }
     // eslint-disable-next-line
@@ -85,14 +75,12 @@ const Main: React.FC = () => {
     <>
       <Navbar setMenu={setMenu} setSearch={setSearch} searchRef={searchRef} />
       <Menubar news={news} />
-      {/* main Content with margins on large screens */}
       <div className="main-content">
         <div className="px-4">
           <Breaking news={news} menu={menu} isLoading={isLoading} />
           <Home news={news} search={search} isLoading={isLoading} />
         </div>
       </div>
-
       <Footer setMenu={setMenu} />
     </>
   );
